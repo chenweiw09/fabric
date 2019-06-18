@@ -29,27 +29,22 @@ import java.util.logging.Logger;
 
 /**
  * Wrapper class for HFCAClient.
- * 
- * @author Balaji Kadambi
- *
  */
 
 public class CAClient {
 
-	String caUrl;
-	Properties caProperties;
+	private String caUrl;
+	private Properties caProperties;
+	private HFCAClient caClient;
+	private UserContext adminContext;
 
-	HFCAClient instance;
 
-	UserContext adminContext;
-
-	public UserContext getAdminUserContext() {
-		return adminContext;
+	public HFCAClient getCaClient() {
+		return caClient;
 	}
 
 	/**
 	 * Set the admin user context for registering and enrolling users.
-	 * 
 	 * @param userContext
 	 */
 	public void setAdminUserContext(UserContext userContext) {
@@ -58,7 +53,6 @@ public class CAClient {
 
 	/**
 	 * Constructor
-	 * 
 	 * @param caUrl 
 	 * @param caProperties
 	 * @throws MalformedURLException
@@ -76,19 +70,15 @@ public class CAClient {
 		init();
 	}
 
-	public void init() throws MalformedURLException, IllegalAccessException, InstantiationException, ClassNotFoundException, CryptoException, InvalidArgumentException, NoSuchMethodException, InvocationTargetException {
+	private void init() throws MalformedURLException, IllegalAccessException, InstantiationException, ClassNotFoundException, CryptoException, InvalidArgumentException, NoSuchMethodException, InvocationTargetException {
 		CryptoSuite cryptoSuite = CryptoSuite.Factory.getCryptoSuite();
-		instance = HFCAClient.createNewInstance(caUrl, caProperties);
-		instance.setCryptoSuite(cryptoSuite);
-	}
-
-	public HFCAClient getInstance() {
-		return instance;
+		caClient = HFCAClient.createNewInstance(caUrl, caProperties);
+		caClient.setCryptoSuite(cryptoSuite);
 	}
 
 	/**
 	 * Enroll admin user.
-	 * 
+	 *  basic admin user can be admin and adminpw
 	 * @param username
 	 * @param password
 	 * @return
@@ -100,7 +90,7 @@ public class CAClient {
 			Logger.getLogger(CAClient.class.getName()).log(Level.WARNING, "CA -" + caUrl + " admin is already enrolled.");
 			return userContext;
 		}
-		Enrollment adminEnrollment = instance.enroll(username, password);
+		Enrollment adminEnrollment = caClient.enroll(username, password);
 		adminContext.setEnrollment(adminEnrollment);
 		Logger.getLogger(CAClient.class.getName()).log(Level.INFO, "CA -" + caUrl + " Enrolled Admin.");
 		Util.writeUserContext(adminContext);
@@ -109,7 +99,7 @@ public class CAClient {
 
 	/**
 	 * Register user.
-	 * 
+	 *  because admin use has all the privileges, a new user should be enrolled and registered
 	 * @param username
 	 * @param organization
 	 * @return
@@ -118,11 +108,10 @@ public class CAClient {
 	public String registerUser(String username, String organization) throws Exception {
 		UserContext userContext = Util.readUserContext(adminContext.getAffiliation(), username);
 		if (userContext != null) {
-			Logger.getLogger(CAClient.class.getName()).log(Level.WARNING, "CA -" + caUrl +" User " + username+ " is already registered.");
-			return null;
+			throw new RuntimeException("CA -" + caUrl +" User " + username+ " is already registered.");
 		}
 		RegistrationRequest rr = new RegistrationRequest(username, organization);
-		String enrollmentSecret = instance.register(rr, adminContext);
+		String enrollmentSecret = caClient.register(rr, adminContext);
 		Logger.getLogger(CAClient.class.getName()).log(Level.INFO, "CA -" + caUrl + " Registered User - " + username);
 		return enrollmentSecret;
 	}
@@ -141,10 +130,29 @@ public class CAClient {
 			Logger.getLogger(CAClient.class.getName()).log(Level.WARNING, "CA -" + caUrl + " User " + user.getName()+" is already enrolled");
 			return userContext;
 		}
-		Enrollment enrollment = instance.enroll(user.getName(), secret);
+		Enrollment enrollment = caClient.enroll(user.getName(), secret);
 		user.setEnrollment(enrollment);
 		Util.writeUserContext(user);
 		Logger.getLogger(CAClient.class.getName()).log(Level.INFO, "CA -" + caUrl +" Enrolled User - " + user.getName());
+		return user;
+	}
+
+	public UserContext registerAndEnrollUser(String username, String organization) throws Exception{
+		UserContext userContext = Util.readUserContext(adminContext.getAffiliation(), username);
+		if (userContext != null) {
+			throw new RuntimeException("CA -" + caUrl +" User " + username+ " is already registered.");
+		}
+		RegistrationRequest rr = new RegistrationRequest(username, organization);
+		String enrollmentSecret = caClient.register(rr, adminContext);
+
+		UserContext user = new UserContext();
+		user.setName(username);
+		Enrollment enrollment = caClient.enroll(user.getName(), enrollmentSecret);
+		user.setEnrollment(enrollment);
+		user.setAffiliation(adminContext.getAffiliation());
+		user.setMspId(adminContext.getMspId());
+
+		Util.writeUserContext(user);
 		return user;
 	}
 

@@ -3,7 +3,7 @@ package com.my.chen.fabric.app.config;
 import java.io.File;
 
 public class Config {
-	public static final String baseUrl ="106.12.208.162";
+	public static final String baseUrl ="192.168.235.128";
 	public static final String ORG1_MSP = "Org1MSP";
 
 	public static final String ORG1 = "org1";
@@ -18,11 +18,11 @@ public class Config {
 	
 	public static final String CHANNEL_CONFIG_PATH = "config/channel.tx";
 	
-	public static final String ORG1_USR_BASE_PATH =File.separator+"data"+File.separator+ "crypto-config" + File.separator + "peerOrganizations" + File.separator
+	public static final String ORG1_USR_BASE_PATH ="src"+File.separator+"main"+File.separator+"resources"+File.separator+"data"+File.separator+ "crypto-config" + File.separator + "peerOrganizations" + File.separator
 			+ "org1.example.com" + File.separator + "users" + File.separator + "Admin@org1.example.com"
 			+ File.separator + "msp";
 	
-	public static final String ORG2_USR_BASE_PATH =File.separator+"data"+File.separator+ "crypto-config" + File.separator + "peerOrganizations" + File.separator
+	public static final String ORG2_USR_BASE_PATH ="src"+File.separator+"main"+File.separator+"resources"+File.separator+"data"+File.separator+ "crypto-config" + File.separator + "peerOrganizations" + File.separator
 			+ "org2.example.com" + File.separator + "users" + File.separator + "Admin@org2.example.com"
 			+ File.separator + "msp";
 	

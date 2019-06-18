@@ -43,6 +43,8 @@ public class CreateChannel {
 			File[] pkFiles1 = pkFolder1.listFiles();
 			File certFolder1 = new File(Config.ORG1_USR_ADMIN_CERT);
 			File[] certFiles1 = certFolder1.listFiles();
+
+
 			Enrollment enrollOrg1Admin = Util.getEnrollment(Config.ORG1_USR_ADMIN_PK, pkFiles1[0].getName(),
 					Config.ORG1_USR_ADMIN_CERT, certFiles1[0].getName());
 			org1Admin.setEnrollment(enrollOrg1Admin);

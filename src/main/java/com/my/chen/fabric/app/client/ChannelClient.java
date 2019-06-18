@@ -40,9 +40,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ChannelClient {
 
-	String name;
-	Channel channel;
-	FabricClient fabClient;
+	private String name;
+	private Channel channel;
+	private FabricClient fabClient;
 
 	public String getName() {
 		return name;
