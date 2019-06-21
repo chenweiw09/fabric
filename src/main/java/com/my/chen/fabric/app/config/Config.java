@@ -16,7 +16,7 @@ public class Config {
 
 	public static final String ADMIN_PASSWORD = "adminpw";
 	
-	public static final String CHANNEL_CONFIG_PATH = "config/channel.tx";
+	public static final String CHANNEL_CONFIG_PATH = "src"+File.separator+"main"+File.separator+"resources"+File.separator+"config"+File.separator+"channel.tx";
 	
 	public static final String ORG1_USR_BASE_PATH ="src"+File.separator+"main"+File.separator+"resources"+File.separator+"data"+File.separator+ "crypto-config" + File.separator + "peerOrganizations" + File.separator
 			+ "org1.example.com" + File.separator + "users" + File.separator + "Admin@org1.example.com"

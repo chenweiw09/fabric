@@ -2,14 +2,9 @@ package com.my.chen.fabric.mc.user;
 
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
-import org.hyperledger.fabric.sdk.identity.X509Enrollment;
-import org.hyperledger.fabric.sdk.security.CryptoPrimitives;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.PrivateKey;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author chenwei
@@ -26,6 +21,13 @@ public class MyUser implements User {
     private String affiliation;
     private Enrollment enrollment;
     private String mspId;
+
+    public MyUser(String mspid, String pem, String key) {
+        this.name= UUID.randomUUID().toString();
+        this.mspId = mspid;
+        this.enrollment = new FCEnrollment(pem, key);
+    }
+
 
     public void setName(String name) {
         this.name = name;
@@ -81,12 +83,4 @@ public class MyUser implements User {
         return mspId;
     }
 
-
-    public Enrollment loadFromPemFile(String keyFile,String certFile) throws Exception {
-        byte[] keyPem = Files.readAllBytes(Paths.get(keyFile));     //载入私钥PEM文本
-        byte[] certPem = Files.readAllBytes(Paths.get(certFile));   //载入证书PEM文本
-        CryptoPrimitives suite = new CryptoPrimitives();            //载入密码学套件
-        PrivateKey privateKey = suite.bytesToPrivateKey(keyPem);    //将PEM文本转换为私钥对象
-        return new X509Enrollment(privateKey,new String(certPem));  //创建并返回X509Enrollment对象
-    }
 }

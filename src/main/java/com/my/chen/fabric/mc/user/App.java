@@ -4,6 +4,7 @@ import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 
 import java.util.Collection;
+import java.util.Properties;
 
 /**
  * @author chenwei
@@ -13,27 +14,66 @@ import java.util.Collection;
  */
 public class App {
 
+    String ccName="mycc";
+    String version="1.0";
+    String path="chaincode/ecdspay/";
+    public static HFClient client = null;
+    public static Peer peer = null;
+    public static Channel channel = null;
+    public static Orderer orderer = null;
+    public static String adminPem = "-----BEGIN CERTIFICATE-----\n" +
+            "MIICCTCCAbCgAwIBAgIQMSl5/o63oXNVbJ2xbTStDTAKBggqhkjOPQQDAjBpMQsw\n" +
+            "CQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\n" +
+            "YW5jaXNjbzEUMBIGA1UEChMLZXhhbXBsZS5jb20xFzAVBgNVBAMTDmNhLmV4YW1w\n" +
+            "bGUuY29tMB4XDTE5MDYyMTA5MjIwMFoXDTI5MDYxODA5MjIwMFowVjELMAkGA1UE\n" +
+            "BhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBGcmFuY2lz\n" +
+            "Y28xGjAYBgNVBAMMEUFkbWluQGV4YW1wbGUuY29tMFkwEwYHKoZIzj0CAQYIKoZI\n" +
+            "zj0DAQcDQgAEV0USlcOJqALSE/bOCdJC/P5/nhk/ntuZ3W9D7gDHOvXvUOoGvLoF\n" +
+            "7eLvvJLUG6xUKE/0LAYnt0AatkaqXJl+HKNNMEswDgYDVR0PAQH/BAQDAgeAMAwG\n" +
+            "A1UdEwEB/wQCMAAwKwYDVR0jBCQwIoAgGaYQMUmOmzTPqvUdhgbf/xoJZv8PnPjA\n" +
+            "7q7obd/C8/MwCgYIKoZIzj0EAwIDRwAwRAIgcsBbAg2dL+mHEZncu5A1T5p5bQZ0\n" +
+            "SY3XruDcb1viHxoCIAflfnXFPE7V9kLTZTQF/tOEW3+4QjyrZz6F3ijZOJMR\n" +
+            "-----END CERTIFICATE-----" ;
+    public static String adminKey = "-----BEGIN PRIVATE KEY-----\n" +
+            "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgG6yxPdtqHIXnZSuN\n" +
+            "gZbj5TkT0i3Iy38gItYZ3nl1U4ehRANCAARXRRKVw4moAtIT9s4J0kL8/n+eGT+e\n" +
+            "25ndb0PuAMc69e9Q6ga8ugXt4u+8ktQbrFQoT/QsBie3QBq2RqpcmX4c\n" +
+            "-----END PRIVATE KEY-----";
+    public static String pem = "-----BEGIN CERTIFICATE-----\n" +
+            "MIICKjCCAdCgAwIBAgIQNrZ7Z8SBFdDjA+IDd966KzAKBggqhkjOPQQDAjBzMQsw\n" +
+            "CQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\n" +
+            "YW5jaXNjbzEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEcMBoGA1UEAxMTY2Eu\n" +
+            "b3JnMS5leGFtcGxlLmNvbTAeFw0xOTA2MjEwOTIyMDBaFw0yOTA2MTgwOTIyMDBa\n" +
+            "MGwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1T\n" +
+            "YW4gRnJhbmNpc2NvMQ8wDQYDVQQLEwZjbGllbnQxHzAdBgNVBAMMFkFkbWluQG9y\n" +
+            "ZzEuZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQHZW/HwQkT\n" +
+            "f5TaEISaovg/uXzEE5qBF8KMWpJ+JEmUguray4RLSeYDYh0JRvqCANHbYHJ9YmYI\n" +
+            "X517dpYqgXg7o00wSzAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADArBgNV\n" +
+            "HSMEJDAigCAv9S1nRnmgHdldSxOLd76NXVXf8k/t4+wJQ6srk/cSgTAKBggqhkjO\n" +
+            "PQQDAgNIADBFAiEAhl4fXRYJyX2bvMDwt7JQYIOGam03cVYVKgMgHsdbYhMCIBuW\n" +
+            "brRJY5mBwVGNDNJvPxxka7GYSBsb7/wSEIhBqeli\n" +
+            "-----END CERTIFICATE-----";
+
 
     public static void main(String[] args) throws Exception {
-        String keyFile = "";
-        String certFile = "";
-        MyUser user = new MyUser();
-        user.setName("admin");
-        user.setEnrollment(user.loadFromPemFile(keyFile,certFile));
-        user.setMspId("SampleOrg");
 
         // 创建HFClient实例
         HFClient client = HFClient.createNewInstance();
         client.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
+
+        User user= new MyUser("Org0MSP", adminPem, adminKey);
+
         client.setUserContext(user);
 
 
         // 创建通道实例
-        Channel channel = client.newChannel("chi");
-        Peer peer = client.newPeer("peer1","grpc://127.0.0.1:7051");
-        channel.addPeer(peer);
+        Channel channel = client.newChannel("channel01");
+        Properties opts = new Properties();
 
-        Orderer orderer = client.newOrderer("orderer1","grpc://127.0.0.1:7050");
+        Peer peer = client.newPeer("peer0","grpc://192.168.235.128:7051", opts);
+        channel.addPeer(peer, Channel.PeerOptions.createPeerOptions());
+
+        Orderer orderer = client.newOrderer("orderer0","grpc://192.168.235.128:7050");
         channel.addOrderer(orderer);
         channel.initialize();
 
@@ -43,7 +83,7 @@ public class App {
         request.setChaincodeID(cid);
         request.setFcn("value");
         ProposalResponse[] rsp = channel.queryByChaincode(request).toArray(new ProposalResponse[0]);
-        System.out.format("rsp message => %s\n",rsp[0].getProposalResponse().getResponse().getPayload().toStringUtf8());
+//        System.out.format("rsp message => %s\n",rsp[0].getProposalResponse().getResponse().getPayload().toStringUtf8());
 
 
         // 提交链码交易

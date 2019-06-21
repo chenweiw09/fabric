@@ -76,7 +76,7 @@ public class QueryChaincode {
 			BlockchainInfo bci = channel.queryBlockchainInfo(peer);
 			System.out.println("区块高度: " + bci.getHeight());
 			BlockInfo bi = channel.queryBlockByNumber(2);
-			ByteString blockhash = bi.getBlock().getHeader().getPreviousHash();
+//			ByteString blockhash = bi.getBlock().getHeader().getPreviousHash();
 			String blocakhashStr = Hex.encodeHexString(bi.getPreviousHash());
 			System.out.println(blocakhashStr);
 			List<Query.ChaincodeInfo> ccdl = channel.queryInstantiatedChaincodes(peer);
